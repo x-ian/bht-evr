@@ -1,26 +1,4 @@
-Create user on Mikrotik
-
-Ensure public keys of local Mikrotik and EVR server are accepted
-
-Add SSH keys for EVR server to user
-
-Copy monitoring scripts (from EVR server)
-
-Cronjobs for user user
-## Collect data and sync every 10 minutes (10 minutes for testing)
-0 * * * * /bin/bash /home/user/evr-indicators/evr-indicators.sh 
-30 * * * * /bin/bash /home/user/evr-indicators/update-scripts-from-server.sh
-@reboot /home/user/evr-indicators/evr-bootcount.sh
-
-Root crontjob
-@reboot /bin/bash /home/user/evr-indicators/get-serial.sh
-
-
+Create user user without password on Mikrotik (only allow access from subnet 192.168.100.0/24)
 
 Validate
-
-Change IP of Mikrotik
-
-Change destination of rsync scripts update
-
 Boot and Crashcount
