@@ -20,12 +20,14 @@ TIMESTAMP=$(date +%Y%m%d-%H%M)
 MACS=$(cat /sys/class/net/*/address | tr "\n" " ")
 #SERIAL_NUMBER=`sudo dmidecode -t system  | grep Serial | awk '{print $3}'`
 SERIAL_NUMBER=`cat /home/user/evr-indicators/serial`
-DMI_MODEL=`dmesg | grep DMI | tr  ',' ' '`
+DMI_MODEL_VERBOSE=`dmesg | grep DMI | head -1 | tr  ',' ' '`
+DMI_MODEL="${DMI_MODEL_VERBOSE:38:80}"
 ROUTER_SERIAL=`$LOGIN "sys rout pri" | grep serial| awk '{print $2}' | tr -d '\r\n'`
 ROUTER_MODEL=`$LOGIN "sys rout pri" | grep model| awk '{print $2}' | tr -d '\r\n'`
 PARTITION_SIZE=`df -H /dev/sda1 | tail -1 |awk '{print $2}'`
 DISK_MODEL_VERBOSE=`udisksctl status | grep sda`
-DISK_MODEL="${DISK_VERBOSE:0:25}"
+DISK_MODEL="${DISK_MODEL_VERBOSE:0:25}"
+LINUX_VERSION=`/usr/bin/lsb_release -d -s`
 
 ########## connectivity ##########
 
@@ -57,7 +59,13 @@ else
 fi
 
 # ping packet loss
-PING_PACKET_LOSS=$(grep "packet loss" $PING_TMP | awk -F "," '{print $3}' | awk '{print $1}' | tr -d '%')
+grep "error" $PING_TMP
+if [ $? -eq 1 ]; then
+	PING_PACKET_LOSS=$(grep "packet loss" $PING_TMP | awk -F "," '{print $3}' | awk '{print $1}' | tr -d '%')
+else
+	# ping output contains +error column in result, ping packet loss shifts from column 3 to 4
+	PING_PACKET_LOSS=$(grep "packet loss" $PING_TMP | awk -F "," '{print $4}' | awk '{print $1}' | tr -d '%')
+fi
 
 # ping avg rrt
 # choose line depending on your distribution
@@ -98,10 +106,10 @@ CRASH_COUNT=$(cat $SCRIPTPATH/evr-crashcount.log)
 mkdir -p $NAME
 
 # print header & values to screen and to files
-echo '$CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE'
-echo $CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE
-echo '$CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE' > /home/user/evr-indicators/$NAME/indicators-header.txt 
-echo $CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE  >> /home/user/evr-indicators/$NAME/indicators.xls
+echo '$CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION'
+echo $CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION
+echo '$CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION' > /home/user/evr-indicators/$NAME/indicators-header.txt 
+echo $CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION  >> /home/user/evr-indicators/$NAME/indicators.xls
 
 ## Tracking serial number of hardware per site
 echo $NAME,$TIMESTAMP, $SERIAL_NUMBER >> /home/user/evr-indicators/$NAME/serial-number.xls
