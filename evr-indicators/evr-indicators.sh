@@ -19,7 +19,7 @@ NAME=`$LOGIN "sys ident print" | awk '{print $2}' | tr -d '\r\n'`
 TIMESTAMP=$(date +%Y%m%d-%H%M)
 MACS=$(cat /sys/class/net/*/address | tr "\n" " ")
 #SERIAL_NUMBER=`sudo dmidecode -t system  | grep Serial | awk '{print $3}'`
-SERIAL_NUMBER=`cat /home/user/evr-indicators/serial`
+SERIAL_NUMBER=`cat ~/evr-indicators/serial`
 DMI_MODEL_VERBOSE=`dmesg | grep DMI | head -1 | tr  ',' ' '`
 DMI_MODEL="${DMI_MODEL_VERBOSE:38:80}"
 ROUTER_SERIAL=`$LOGIN "sys rout pri" | grep serial| awk '{print $2}' | tr -d '\r\n'`
@@ -108,17 +108,17 @@ mkdir -p $NAME
 # print header & values to screen and to files
 echo '$CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION'
 echo $CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION
-echo '$CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION' > /home/user/evr-indicators/$NAME/indicators-header.txt 
-echo $CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION  >> /home/user/evr-indicators/$NAME/indicators.xls
+echo '$CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION' > ~/evr-indicators/$NAME/indicators-header.txt 
+echo $CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION  >> ~/evr-indicators/$NAME/indicators.xls
 
 ## Tracking serial number of hardware per site
-echo $NAME,$TIMESTAMP, $SERIAL_NUMBER >> /home/user/evr-indicators/$NAME/serial-number.xls
-echo $TIMESTAMP,$ROUTER_SERIAL,$ROUTER_MODEL > /home/user/evr-indicators/$NAME/Router_details.xls
-echo $TIMESTAMP  $MESH_NB_SIGNAL_2G >> /home/user/evr-indicators/$NAME/neibor-signa2.4G
-echo $TIMESTAMP  $MESH_NB_SIGNAL_5G >> /home/user/evr-indicators/$NAME/neibor-signa5.0G
-#echo $TIMESTAMP $SCAN_CLUSTERS >> /home/user/evr-indicators/$NAME/scan-clusters
+echo $NAME,$TIMESTAMP, $SERIAL_NUMBER >> ~/evr-indicators/$NAME/serial-number.xls
+echo $TIMESTAMP,$ROUTER_SERIAL,$ROUTER_MODEL > ~/evr-indicators/$NAME/Router_details.xls
+echo $TIMESTAMP  $MESH_NB_SIGNAL_2G >> ~/evr-indicators/$NAME/neibor-signa2.4G
+echo $TIMESTAMP  $MESH_NB_SIGNAL_5G >> ~/evr-indicators/$NAME/neibor-signa5.0G
+#echo $TIMESTAMP $SCAN_CLUSTERS >> ~/evr-indicators/$NAME/scan-clusters
 
 # wait for 5 seconds to allow the data collection process to finalize before syncing the data with EVR server
 sleep 5
 
-/usr/bin/rsync -arv --append /home/user/evr-indicators/$NAME user@192.168.21.254:~/evr-indicators
+/usr/bin/rsync -arv --append ~/evr-indicators/$NAME user@192.168.21.254:~/evr-indicators

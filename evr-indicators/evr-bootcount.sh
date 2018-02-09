@@ -15,15 +15,15 @@ if [ ! -f $SCRIPTPATH/evr-crashcount.log ]; then
     echo "0" > $SCRIPTPATH/evr-crashcount.log
 fi
 
-echo $[$(</home/user/evr-indicators/evr-bootcount.log)+1] > /home/user/evr-indicators/evr-bootcount.log
+echo $[$(<~/evr-indicators/evr-bootcount.log)+1] > ~/evr-indicators/evr-bootcount.log
 
 # search all first messages after startup plus the line before
-grep -B 1 'x-info="http://www.rsyslog.com"] start' /var/log/syslog | tail -2 > /home/user/evr-indicators/evr-startup.log
+grep -B 1 'x-info="http://www.rsyslog.com"] start' /var/log/syslog | tail -2 > ~/evr-indicators/evr-startup.log
 # check if rsyslogd properly exited on signal 15, if not then assume a crash
-grep 'x-info="http://www.rsyslog.com"] exiting on signal 15.' /home/user/evr-indicators/evr-startup.log
+grep 'x-info="http://www.rsyslog.com"] exiting on signal 15.' ~/evr-indicators/evr-startup.log
 if [ $? -ne 0 ]; then
 	# no proper rsyslogd shutdown, assuming crash and increase counter
-	touch /home/user/evr-indicators/evr-crashcount.log
-	echo $[$(</home/user/evr-indicators/evr-crashcount.log)+1] > /home/user/evr-indicators/evr-crashcount.log
+	touch ~/evr-indicators/evr-crashcount.log
+	echo $[$(<~/evr-indicators/evr-crashcount.log)+1] > ~/evr-indicators/evr-crashcount.log
 fi
-rm /home/user/evr-indicators/evr-startup.log
+rm ~/evr-indicators/evr-startup.log
