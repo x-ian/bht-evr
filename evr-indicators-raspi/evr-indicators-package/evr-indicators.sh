@@ -7,7 +7,7 @@ sleep $[ ( $RANDOM % 120 )  + 1 ]s
 
 # try to set system time based on EVR server
 SERVER_TIME=`ssh pi@192.168.21.254 date "+%m%d%H%M%Y"`
-date -s $SERVER_TIME
+sudo date -s $SERVER_TIME
 
 CSV_VERSION=2
 
@@ -23,15 +23,20 @@ NAME=`$LOGIN "sys ident print" | awk '{print $2}' | tr -d '\r\n'`
 TIMESTAMP=$(date +%Y%m%d-%H%M)
 MACS=$(cat /sys/class/net/*/address | tr "\n" " ")
 #SERIAL_NUMBER=`sudo dmidecode -t system  | grep Serial | awk '{print $3}'`
-SERIAL_NUMBER=`cat ~/evr-indicators/serial`
-DMI_MODEL_VERBOSE=`dmesg | grep DMI | head -1 | tr  ',' ' '`
-DMI_MODEL="${DMI_MODEL_VERBOSE:38:80}"
+#SERIAL_NUMBER=`cat ~/evr-indicators/serial`
+SERIAL_NUMBER="pi"
+#DMI_MODEL_VERBOSE=`dmesg | grep DMI | head -1 | tr  ',' ' '`
+#DMI_MODEL="${DMI_MODEL_VERBOSE:38:80}"
+DMI_MODEL=""
 ROUTER_SERIAL=`$LOGIN "sys rout pri" | grep serial| awk '{print $2}' | tr -d '\r\n'`
 ROUTER_MODEL=`$LOGIN "sys rout pri" | grep model| awk '{print $2}' | tr -d '\r\n'`
-PARTITION_SIZE=`df -H /dev/sda1 | tail -1 |awk '{print $2}'`
-DISK_MODEL_VERBOSE=`udisksctl status | grep sda`
-DISK_MODEL="${DISK_MODEL_VERBOSE:0:25}"
-LINUX_VERSION=`/usr/bin/lsb_release -d -s`
+#PARTITION_SIZE=`df -H /dev/sda1 | tail -1 |awk '{print $2}'`
+PARTITION_SIZE=""
+#DISK_MODEL_VERBOSE=`udisksctl status | grep sda`
+#DISK_MODEL="${DISK_MODEL_VERBOSE:0:25}"
+DISK_MODEL=""
+#LINUX_VERSION=`/usr/bin/lsb_release -d -s`
+LINUX_VERSION=""
 
 ########## connectivity ##########
 

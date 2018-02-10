@@ -1,4 +1,0 @@
-Create user user without password on Mikrotik (only allow access from subnet 192.168.100.0/24)
-
-Validate
-Boot and Crashcount
