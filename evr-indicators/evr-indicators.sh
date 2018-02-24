@@ -6,8 +6,10 @@
 sleep $[ ( $RANDOM % 120 )  + 1 ]s
 
 # try to set system time based on EVR server
-SERVER_TIME=`ssh pi@192.168.21.254 date "+%m%d%H%M%Y"`
-date -s $SERVER_TIME
+#requires root to change config
+# run sudo visudo and add this line: user ALL=(ALL) NOPASSWD: /bin/date
+SERVER_TIME=`ssh user@192.168.21.254 date`
+sudo date --set="$SERVER_TIME"
 
 CSV_VERSION=3
 
@@ -17,9 +19,12 @@ HOST=192.168.100.1
 USER=user
 set timeout 10
 # for mikrotik bypass check of host key as this will change as J2s are moved around
-LOGIN="ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null $USER@$HOST"
+LOGIN="ssh -oKexAlgorithms=diffie-hellman-group1-sha1,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1 -oCiphers=3des-cbc,blowfish-cbc,aes128-cbc,aes128-ctr,aes256-ctr -oStrictHostKeyChecking=no -oHostKeyAlgorithms=+ssh-dss -oUserKnownHostsFile=/dev/null $USER@$HOST"
 IP=`$LOGIN "ip addr pr" | grep TA-MTEMA | awk '{print $2}' | sed -r 's/.{3}$//'`
 NAME=`$LOGIN "sys ident print" | awk '{print $2}' | tr -d '\r\n'`
+if [ -z $NAME ]; then
+  NAME=UNKNOWN
+fi
 TIMESTAMP=$(date +%Y%m%d-%H%M)
 MACS=$(cat /sys/class/net/*/address | tr "\n" " ")
 #SERIAL_NUMBER=`sudo dmidecode -t system  | grep Serial | awk '{print $3}'`
@@ -28,11 +33,11 @@ DMI_MODEL_VERBOSE=`dmesg | grep DMI | head -1 | tr  ',' ' '`
 DMI_MODEL="${DMI_MODEL_VERBOSE:38:80}"
 ROUTER_SERIAL=`$LOGIN "sys rout pri" | grep serial| awk '{print $2}' | tr -d '\r\n'`
 ROUTER_MODEL=`$LOGIN "sys rout pri" | grep model| awk '{print $2}' | tr -d '\r\n'`
-PARTITION_SIZE=`df -H /dev/sda1 | tail -1 |awk '{print $2}'`
+PARTITION_SIZE=`df -H | tail -1 |awk '{print $2}'`
 DISK_MODEL_VERBOSE=`udisksctl status | grep sda`
 DISK_MODEL="${DISK_MODEL_VERBOSE:0:25}"
 LINUX_VERSION=`/usr/bin/lsb_release -d -s`
-UPTIME=`/usr/bin/uptime | /usr/bin/awk '{print $3}' | /bin/sed 's/,//g'`
+UPTIME=`/usr/bin/uptime | /usr/bin/awk '{print $3} {print $4}' | /bin/sed 's/,//g'`
 
 ########## connectivity ##########
 
@@ -84,7 +89,7 @@ rm $PING_TMP
 # download a javascript library also required by news app, ~100 KB
 URL_DOWNLOAD=http://192.168.21.254:3000/lib/jquery-1.11.1.min.js
 
-HTTP=$(wget -O /dev/null $URL_DOWNLOAD 2>&1 | tail -2 | awk  '{ print $3 " " $4 }' | sed 's/[()]//g')
+HTTP=$(wget --tries=5 --timeout=60 -O /dev/null $URL_DOWNLOAD 2>&1 | tail -2 | awk  '{ print $3 " " $4 }' | sed 's/[()]//g')
 HTTP_SPEED=$(echo $HTTP | awk '{ print $1 }' | tr ',' '.')
 HTTP_UNIT=$(echo $HTTP | awk '{ print $2 }')
 if [ "$HTTP_UNIT" == "MB/s" ]; then

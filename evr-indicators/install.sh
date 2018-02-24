@@ -1,12 +1,7 @@
 #!/bin/bash
 
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-
-# Create directory & copy scripts
-mkdir ~/evr-indicators
 cd $SCRIPTPATH
-cp evr-bootcount.sh evr-indicators.sh get-serial.sh maintenance.sh update-scripts-from-server.sh ~/evr-indicators
-chmod +x ~/evr-indicators/*.sh
 
 # SSH stuff
 mkdir ~/.ssh
@@ -24,7 +19,7 @@ echo "# 192.168.21.254 SSH-2.0-OpenSSH_6.6.1p1 Ubuntu-2ubuntu2
 (crontab -l ; echo "@reboot ~/evr-indicators/evr-bootcount.sh") | crontab -
 
 # install cronjob for root
-(sudo crontab -u root -l ; echo "@reboot /bin/bash ~/evr-indicators/get-serial.sh") | sudo crontab -u root -
+(sudo crontab -u root -l ; echo "@reboot /bin/bash /home/user/evr-indicators/get-serial.sh") | sudo crontab -u root -
 
 echo .
 echo .

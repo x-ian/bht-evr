@@ -88,7 +88,7 @@ rm $PING_TMP
 # download a javascript library also required by news app, ~100 KB
 URL_DOWNLOAD=http://192.168.21.254:3000/lib/jquery-1.11.1.min.js
 
-HTTP=$(wget -O /dev/null $URL_DOWNLOAD 2>&1 | tail -2 | awk  '{ print $3 " " $4 }' | sed 's/[()]//g')
+HTTP=$(wget --tries=5 --timeout=60 -O /dev/null $URL_DOWNLOAD 2>&1 | tail -2 | awk  '{ print $3 " " $4 }' | sed 's/[()]//g')
 HTTP_SPEED=$(echo $HTTP | awk '{ print $1 }' | tr ',' '.')
 HTTP_UNIT=$(echo $HTTP | awk '{ print $2 }')
 if [ "$HTTP_UNIT" == "MB/s" ]; then

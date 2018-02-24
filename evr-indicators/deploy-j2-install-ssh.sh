@@ -1,6 +1,7 @@
 #!/bin/bash
 
-LOGIN_J2=user@192.168.85.194
+#LOGIN_J2=user@192.168.85.194
+LOGIN_J2=user@192.168.85.195
 
 ssh $LOGIN_J2 <<EOF
 mkdir evr-indicators
