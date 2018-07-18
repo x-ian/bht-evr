@@ -8,10 +8,11 @@ sleep $[ ( $RANDOM % 120 )  + 1 ]s
 # try to set system time based on EVR server
 #requires root to change config
 # run sudo visudo and add this line: user ALL=(ALL) NOPASSWD: /bin/date
-SERVER_TIME=`ssh user@192.168.21.254 date`
-sudo date --set="$SERVER_TIME"
+#SERVER_TIME=`ssh user@192.168.21.254 date`
+#sudo date --set="$SERVER_TIME"
+SERVER_TIME=`ssh user@192.168.21.254 date +%Y%m%d-%H%M`
 
-CSV_VERSION=3
+CSV_VERSION=4
 
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 #HOST=192.168.22.22
@@ -22,6 +23,10 @@ set timeout 10
 LOGIN="ssh -oKexAlgorithms=diffie-hellman-group1-sha1,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1 -oCiphers=3des-cbc,blowfish-cbc,aes128-cbc,aes128-ctr,aes256-ctr -oStrictHostKeyChecking=no -oHostKeyAlgorithms=+ssh-dss -oUserKnownHostsFile=/dev/null $USER@$HOST"
 IP=`$LOGIN "ip addr pr" | grep TA-MTEMA | awk '{print $2}' | sed -r 's/.{3}$//'`
 NAME=`$LOGIN "sys ident print" | awk '{print $2}' | tr -d '\r\n'`
+ROUTER_SERIAL=`$LOGIN "sys rout pri" | grep serial| awk '{print $2}' | tr -d '\r\n'`
+if [ -z $NAME ]; then
+  NAME=$ROUTER_SERIAL
+fi
 if [ -z $NAME ]; then
   NAME=UNKNOWN
 fi
@@ -38,6 +43,10 @@ DISK_MODEL_VERBOSE=`udisksctl status | grep sda`
 DISK_MODEL="${DISK_MODEL_VERBOSE:0:25}"
 LINUX_VERSION=`/usr/bin/lsb_release -d -s`
 UPTIME=`/usr/bin/uptime | /usr/bin/awk '{print $3} {print $4}' | /bin/sed 's/,//g'`
+MT_VOLTAGE=`$LOGIN "sys health print" | grep voltage | awk '{print $2}' | tr -d '\r\n' | tr -d 'V'`
+MT_TEMP=`$LOGIN "sys health print" | grep temp | awk '{print $2}' | tr -d '\r\n' | tr -d 'C'`
+MT_UPTIME=`$LOGIN "sys resource print" | grep uptime | awk '{print $2}' | tr -d '\r\n'`
+MT_CPU_LOAD=`$LOGIN "sys resource print" | grep cpu-load | awk '{print $2}' | tr -d '\r\n' | tr -d '%'`
 
 ########## connectivity ##########
 
@@ -116,10 +125,10 @@ CRASH_COUNT=$(cat $SCRIPTPATH/evr-crashcount.log)
 mkdir -p $NAME
 
 # print header & values to screen and to files
-echo '$CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION,$UPTIME'
-echo $CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION,$UPTIME
-echo '$CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION,$UPTIME' > ~/evr-indicators/$NAME/indicators-header.txt 
-echo $CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION,$UPTIME  >> ~/evr-indicators/$NAME/indicators.xls
+echo '$CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION,$UPTIME,$MT_VOLTAGE,$MT_TEMP,$MT_UPTIME,$MT_CPU_LOAD,$SERVER_TIME'
+echo $CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION,$UPTIME,$MT_VOLTAGE,$MT_TEMP,$MT_UPTIME,$MT_CPU_LOAD,$SERVER_TIME
+echo '$CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION,$UPTIME,$MT_VOLTAGE,$MT_TEMP,$MT_UPTIME,$MT_CPU_LOAD,$SERVER_TIME' > ~/evr-indicators/$NAME/indicators-header.txt 
+echo $CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION,$UPTIME,$MT_VOLTAGE,$MT_TEMP,$MT_UPTIME,$MT_CPU_LOAD,$SERVER_TIME  >> ~/evr-indicators/$NAME/indicators.xls
 
 ## Tracking serial number of hardware per site
 echo $NAME,$TIMESTAMP, $SERIAL_NUMBER >> ~/evr-indicators/$NAME/serial-number.xls
