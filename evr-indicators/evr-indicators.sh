@@ -22,10 +22,14 @@ set timeout 10
 # for mikrotik bypass check of host key as this will change as J2s are moved around
 LOGIN="ssh -oKexAlgorithms=diffie-hellman-group1-sha1,curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group-exchange-sha256,diffie-hellman-group14-sha1 -oCiphers=3des-cbc,blowfish-cbc,aes128-cbc,aes128-ctr,aes256-ctr -oStrictHostKeyChecking=no -oHostKeyAlgorithms=+ssh-dss -oUserKnownHostsFile=/dev/null $USER@$HOST"
 IP=`$LOGIN "ip addr pr" | grep TA-MTEMA | awk '{print $2}' | sed -r 's/.{3}$//'`
-NAME=`$LOGIN "sys ident print" | awk '{print $2}' | tr -d '\r\n'`
+NAME=`$LOGIN "sys ident print" | tr -d '\r\n' | tr -d ' ' | sed 's/name://g'`
 ROUTER_SERIAL=`$LOGIN "sys rout pri" | grep serial| awk '{print $2}' | tr -d '\r\n'`
+SERIAL_NUMBER=`cat ~/evr-indicators/serial`
 if [ -z $NAME ]; then
   NAME=$ROUTER_SERIAL
+fi
+if [ -z $NAME ]; then
+  NAME=$SERIAL_NUMBER
 fi
 if [ -z $NAME ]; then
   NAME=UNKNOWN
@@ -33,7 +37,7 @@ fi
 TIMESTAMP=$(date +%Y%m%d-%H%M)
 MACS=$(cat /sys/class/net/*/address | tr "\n" " ")
 #SERIAL_NUMBER=`sudo dmidecode -t system  | grep Serial | awk '{print $3}'`
-SERIAL_NUMBER=`cat ~/evr-indicators/serial`
+#SERIAL_NUMBER=`cat ~/evr-indicators/serial`
 DMI_MODEL_VERBOSE=`dmesg | grep DMI | head -1 | tr  ',' ' '`
 DMI_MODEL="${DMI_MODEL_VERBOSE:38:80}"
 ROUTER_SERIAL=`$LOGIN "sys rout pri" | grep serial| awk '{print $2}' | tr -d '\r\n'`
