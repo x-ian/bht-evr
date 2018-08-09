@@ -38,7 +38,7 @@ DMI_MODEL_VERBOSE=`dmesg | grep DMI | head -1 | tr  ',' ' '`
 DMI_MODEL="${DMI_MODEL_VERBOSE:38:80}"
 ROUTER_SERIAL=`$LOGIN "sys rout pri" | grep serial| awk '{print $2}' | tr -d '\r\n'`
 ROUTER_MODEL=`$LOGIN "sys rout pri" | grep model| awk '{print $2}' | tr -d '\r\n'`
-ROUTER_MAC=`$LOGIN "interface wireless print" | grep Main | awk '{print $5}'`
+ROUTER_MAC=`$LOGIN "interface wireless print" | grep Main | awk '{print $4}'`
 PARTITION_SIZE=`df -H | tail -1 |awk '{print $2}'`
 DISK_MODEL_VERBOSE=`udisksctl status | grep sda`
 DISK_MODEL="${DISK_MODEL_VERBOSE:0:25}"
@@ -148,7 +148,7 @@ CRASH_COUNT=$(cat $SCRIPTPATH/evr-crashcount.log)
 
 ##Create directory with name of the village if the directory does not exist
 
-mkdir -p $NAME
+mkdir -p ~/evr-indicators/$NAME
 
 # print header & values to screen and to files
 echo '$CSV_VERSION,$IP,$NAME,$TIMESTAMP,$MACS,$SERIAL_NUMBER,$ROUTER_SERIAL,$ROUTER_MODEL,$PING_EXIT_CODE,$PING_DUPS,$PING_PACKET_LOSS,$PING_RRT_AVG,$HTTP_SPEED,$MESH_NEIGHBOR_COUNT,$STARTUP_COUNT,$CRASH_COUNT,$DMI_MODEL,$DISK_MODEL,$PARTITION_SIZE,$LINUX_VERSION,$UPTIME,$MT_VOLTAGE,$MT_TEMP,$MT_UPTIME,$MT_CPU_LOAD,$SERVER_TIME,$ROUTER_MAC,$MESH_NEIGHBOR_COUNT_2G,$MESH_CLUSTER'
