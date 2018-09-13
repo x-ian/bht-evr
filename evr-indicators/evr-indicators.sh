@@ -3,7 +3,7 @@
 # collect key infrastructure indicators for EVR (like connectivity and system uptime)
 
 # wait for random up to 60 seconds to prevent all systems hitting the network at the same time
-sleep $[ ( $RANDOM % 120 )  + 1 ]s
+sleep $[ ( $RANDOM % 600 )  + 1 ]s
 
 # try to set system time based on EVR server
 #requires root to change config
