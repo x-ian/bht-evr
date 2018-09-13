@@ -50,11 +50,12 @@ do
 	echo $line$APPEND >> $OUT_FILE2
 done < $OUT_FILE
 
-exit 0
-
 # import neighbours for one sitee
 mysql -u $MYSQL_USER -p$MYSQL_PW $MYSQL_DB -e "truncate evr_links_raw"
-mysql -u $MYSQL_USER -p$MYSQL_PW $MYSQL_DB -e "LOAD DATA INFILE '/tmp/village_neighbours/evr_links_raw_2' into table evr_links_raw fields terminated BY ','"
+#mysql -u $MYSQL_USER -p$MYSQL_PW $MYSQL_DB -e "LOAD DATA INFILE '/tmp/village_neighbours/evr_links_raw_2' into table evr_links_raw fields terminated BY ','"
+#mysqlimport  -u root -proot  --fields-terminated-by=',' --local $MYSQL_DB /tmp/evr_links_raw.csv
+
+update evr_links set name = substring(name,1, instr(name,'_')-1);
 
 # convert (transpose) to evr_links for ease of analysis
 mysql -u $MYSQL_USER -p$MYSQL_PW $MYSQL_DB <<EOF
