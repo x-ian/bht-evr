@@ -2,9 +2,9 @@
 
 DISTINCT_SITES=`awk -F "\"*;\"*" '{print $2}' village_signals.csv | sort | uniq`
 
-while read site
-do
-	#site=Wayakumseche
+#while read site
+#do
+	site=KANINGA
 	echo $site
 	TMP_FILE=./tmp/village_signals_$site
 
@@ -38,5 +38,5 @@ do
 		echo $GNUPLOT_LINE >> ./data/$site
 	done <<< "$DISTINCT_TIMESTAMPS"
 	
-done <<< "$DISTINCT_SITES"
+#done <<< "$DISTINCT_SITES"
 

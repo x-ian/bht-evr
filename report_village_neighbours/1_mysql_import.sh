@@ -22,7 +22,7 @@ echo > $OUT_FILE2
 cd /home/user/evr-indicators
 
 # through all together into one CSV file
-find . -name neibor-signa5.0G -exec echo {} \; > $ALL_SITES
+find . -name neibor-signa2.4G -exec echo {} \; > $ALL_SITES
 while read site
 do
 	echo $site
@@ -49,6 +49,8 @@ do
 	APPEND=`seq -s, $MISSING_COMMAS |tr -d '[:digit:]'`
 	echo $line$APPEND >> $OUT_FILE2
 done < $OUT_FILE
+
+exit 0
 
 # import neighbours for one sitee
 mysql -u $MYSQL_USER -p$MYSQL_PW $MYSQL_DB -e "truncate evr_links_raw"
