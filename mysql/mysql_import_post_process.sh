@@ -11,6 +11,12 @@ delete from $MYSQL_TABLE where CSV_version in ('1', '2', '3', '4');
 
 update $MYSQL_TABLE set server_time = null where server_time = '';
 
+update $MYSQL_TABLE set mt_start_count = '0' where mt_start_count in ('no such item', '');
+update $MYSQL_TABLE set mt_start_count = '0' where mt_start_count is NULL;
+
+-- update evr_indicators_v8 set http_speed = -1 
+-- where http_speed in ('try:','http://192.168.21.254/jquery-1.11.1.min.js');
+
 -- IGNORE necessary as some J2 realtime clocks often/always jump back to the same initial date
 update IGNORE $MYSQL_TABLE inner join evr_sites on (evr_sites.name=$MYSQL_TABLE.name)
 set $MYSQL_TABLE.name = evr_sites.uniq_name;
