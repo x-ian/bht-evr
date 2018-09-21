@@ -1,5 +1,7 @@
 #/bin/bash
 
+cd /home/user/evr-indicators
+
 TODAY=$(date +%Y%m%d)
 
 REPORT_DIR=reports
