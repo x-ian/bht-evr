@@ -9,7 +9,7 @@ set terminal png size 1200, 400
 set datafile separator ';'
  
 # Title of the plot
-set title ARG1
+set title "$0"
  
 # We want a grid
 set grid
@@ -29,11 +29,11 @@ set key outside top right box
  
 # output into png file
 set terminal png large
-set output ARG3
+set output "$2"
   
 # read data from file and generate plot
 # warning are ok
-plot ARG2 using 1:2 with lines title columnhead \
+plot "$1" using 1:2 with lines title columnhead \
   , "" using 1:3 with lines title columnhead \
   , "" using 1:4 with lines title columnhead \
   , "" using 1:5 with lines title columnhead \
