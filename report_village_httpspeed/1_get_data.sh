@@ -14,18 +14,28 @@ ALL_SITES=`mysql -u $MYSQL_USER -p$MYSQL_PW $MYSQL_DB --skip-column-names -e "se
 while read -r line; do
 	mysql -u root -proot $MYSQL_DB --skip-column-names <<EOF
 	select name, timestamp_corrected, 
-	REPLACE(
+	IF(http_speed like '%MB/s%', REPLACE(http_speed, ' MB/s', '') * 1000,
 		REPLACE(
 			REPLACE(
-				REPLACE(http_speed, ' KB/s', ''),
-				'http://192.168.21.254/jquery-1.11.1.min.js 192.168.21.254:80...',
-				'-20'
+				REPLACE(
+					REPLACE(
+						REPLACE(
+							REPLACE(http_speed, ' KB/s', ''),
+							'http://192.168.21.254/jquery-1.11.1.min.js 192.168.21.254:80...',
+							'-20'
+						),
+						'http://192.168.21.254/jquery-1.11.1.min.js',
+						'-20'
+					),
+					'try:',
+					'-20'
+				),
+				'http://192.168.21.254:3000/lib/jquery-1.11.1.min.js',
+				-20
 			),
-			'http://192.168.21.254/jquery-1.11.1.min.js',
-			'-20'
-		),
-		'try:',
-		'-20'
+			'try: 2 192.168.21.254:80... failed:',
+			-20
+		)
 	)
 	from $MYSQL_TABLE 
 	where timestamp_corrected >= (NOW() - INTERVAL 4 WEEK) and UPPER(name) in ('$line')
