@@ -100,7 +100,6 @@ int pololuAcs711DcMilliAmps(int analogInputPin, int mVReference, int zeroLoadOff
   // reference voltage, should be 5 V, but can vary a bit
   // with my MacBookPro and Leonardo via USB it is 5110
   //const int mVReference = 5110;
-
   // 36.7 * (voltage / mVReference) - 18.3
 
   // 136 mV / Amp for +/- 15 A version, depending on mVRef
