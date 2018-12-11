@@ -1,5 +1,19 @@
 #include <EEPROM.h>
 
+/*shematic conection
+ ----------------------------------------------------------------------------------------------------------
+ * The LCD K should be connected to ground,
+ * The A pin connected to 5v
+ * lcd pin d7,d6,d5,d4,should be connected top arduino digital pin 3 -D5 respectively
+ * the lcd e and rshould be connectedpins should be connected to arduino digital pin 11 & 12 respectively
+ * lcd rw and vss should be connected to ground
+ * vdd should be connected to 5 v
+ * lcd V0 pin should be connected to postive pin of potential meter(for brighteness channging)) 
+ * the two negative pins of potential meter should go to ground 
+
+Arduino Tutorial: Learn how to use an LCD 16x2 screen
+More info: http://www.ardumotive.com/how-to-use-an-lcd-dislpay-en.html  */
+
 const int eepromStartupCounterAddress=0;
 
 int startupCounter;
@@ -7,7 +21,14 @@ long currentRuntimeInMinutes;
 
 long previousMilliAmpMinutes;
 
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2); // initialize the library with the numbers of the interface pins
+
 void setup() {
+  
+  lcd.begin(16, 2); // set up the LCD's number of columns and rows: 
+    
+   // lcd.print("CURRENT.DETECTOR!"); // Print a message to the LCD.
+  
   while (!Serial) {
     delay(1);  // for Leonardo/Micro/Zero
   }
@@ -31,7 +52,12 @@ void setup() {
 }
 
 void loop() {
-  delay(60000);
+  //delay(60000);
+  
+  // set the cursor to column 0, line 1
+  // (note: line 1 is the second row, since counting begins with 0):
+  lcd.setCursor(0, 1);
+  //lcd.print("Codebender"); //Print a message to second line of LCD
 
   currentRuntimeInMinutes++;
   writeRuntimeCounterForStartup(startupCounter, currentRuntimeInMinutes);  
@@ -46,13 +72,18 @@ void loop() {
   
   Serial.print("startupCounter: ");
   Serial.print(startupCounter);
+  // lcd.print("SC");
+  // lcd.print(startupCounter); /*when you uncomment this it will print startupcounter on the lcd*/
   Serial.print(" - currentRuntime: ");
   Serial.print(currentRuntimeInMinutes);
   Serial.print(" -  current milliAmps: ");
   Serial.print(milliAmps);
   Serial.print(" -  milliAmpHours: ");
   Serial.print(currentMilliAmpHours);
+  //lcd.print(" mAH ");
+  //lcd.print(currentMilliAmpHours); /*when you uncomment this it will print currentmilliampshours on the lcd*/
   Serial.println();
+  delay(60000);
 }
 
 long readMilliAmps() {
@@ -69,7 +100,6 @@ int pololuAcs711DcMilliAmps(int analogInputPin, int mVReference, int zeroLoadOff
   // reference voltage, should be 5 V, but can vary a bit
   // with my MacBookPro and Leonardo via USB it is 5110
   //const int mVReference = 5110;
-
   // 36.7 * (voltage / mVReference) - 18.3
 
   // 136 mV / Amp for +/- 15 A version, depending on mVRef
@@ -125,6 +155,17 @@ void printInternalEeprom() {
     Serial.print(mah);
     Serial.print(" milliamphours ");
     Serial.println();
+    
+    if ( i > startups - 2) /*the if statement is to control the lcd to only display two values from the loop while serially all values are being displayed*/
+        {
+          lcd.print("T");
+          lcd.print(runtimes/100000);/*the 100000 is there to  round the number to 2 or 3 digits possible to avoid clouding the lcd*/
+          delay(2000);
+      
+          lcd.print(" A");
+          lcd.print(mah/10000000); /*the 10000000 is there to  round the number to 3 digits possible to avoid clouding the lcd*/
+          delay(1000);
+          }
   }
 }
 
